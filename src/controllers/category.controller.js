@@ -16,13 +16,13 @@ export async function createCategory(req, res) {
     }
 }
 
-export async function getAll(req, res) {
+export async function getAllCategories(req, res) {
 
     try {
 
         const categories = await connection.query(`SELECT * FROM categories`)
 
-        res.status(200).send(categories)
+        res.status(200).send(categories.rows)
 
     } catch (err) {
         console.log(err)

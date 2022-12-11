@@ -1,13 +1,11 @@
 import { Router } from "express";
-import { createCategory, getAll } from "../controllers/category.controller.js";
+import { createCategory, getAllCategories } from "../controllers/category.controller.js";
 import { categoryValidation } from "../middlewares/category.middleware.js";
 
 const router = Router()
 
-router.get('/categories', getAll)
+router.get('/categories', getAllCategories)
 
-router.use(categoryValidation)
-
-router.post('/categories', createCategory)
+router.post('/categories', categoryValidation, createCategory)
 
 export default router
