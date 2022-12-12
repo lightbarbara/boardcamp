@@ -4,11 +4,11 @@ export async function getAllGames(req, res) {
 
     let { name } = req.query
 
-    name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
-
     try {
 
         if (name) {
+            name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+
             const gamesFiltered = await connection.query(`SELECT * FROM games WHERE name LIKE '${name}%'`)
 
             res.status(200).send(gamesFiltered.rows)
