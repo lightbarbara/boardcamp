@@ -33,3 +33,27 @@ export async function customerValidation(req, res, next) {
     }
 
 }
+
+export async function customerIdValidation(req, res, next) {
+
+    const { id } = req.params
+
+    try {
+
+        const customerExists = await connection.query(`SELECT id, name, phone, cpf, birthday::text FROM customers WHERE id=$1`, [id])
+
+        if (customerExists.rows.length === 0) {
+            res.sendStatus(404)
+            return
+        }
+
+        res.locals.customer = customerExists.rows[0]
+
+        next()
+
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+
+}

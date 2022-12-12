@@ -33,7 +33,7 @@ export async function findAllCustomers(req, res) {
             return
         }
 
-        const customers = await connection.query(`SELECT name, phone, cpf, birthday::text FROM customers`)
+        const customers = await connection.query(`SELECT id, name, phone, cpf, birthday::text FROM customers`)
 
         res.status(200).send(customers.rows)
 
@@ -46,8 +46,9 @@ export async function findAllCustomers(req, res) {
 
 export async function findCustomerById(req, res) {
 
+    const { customer } = res.locals
 
-
+    res.send(customer)
 }
 
 export async function updateCustomer(req, res) {
