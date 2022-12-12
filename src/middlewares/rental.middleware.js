@@ -38,7 +38,7 @@ export async function rentalValidation(req, res, next) {
 
         rental = {
             ...rental,
-            rentDate: dayjs().format('YYYY-MM-DD'),
+            rentDate: dayjs().format('YYYY-MM-DD').toLocaleString("pt-BR", {timeZone: "America/Sao_Paulo"}),
             originalPrice: price,
             returnDate: null,
             delayFee: null
@@ -54,6 +54,35 @@ export async function rentalValidation(req, res, next) {
         }
 
         res.locals.rental = rental
+
+        next()
+
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+
+}
+
+export async function rentalReturnValidation(req, res, next) {
+
+    let { id } = req.params
+
+    try {
+
+        const rentalExists = await connection.query(`SELECT * FROM rentals WHERE id=$1;`, [id])
+
+        if (rentalExists.rows.length === 0) {
+            res.sendStatus(404)
+            return
+        }
+
+        if (rentalExists.rows[0].returnDate) {
+            res.sendStatus(400)
+            return
+        }
+
+        res.locals.rental = rentalExists.rows[0]
 
         next()
 
