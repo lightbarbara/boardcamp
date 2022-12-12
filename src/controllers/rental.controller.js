@@ -72,6 +72,17 @@ export async function findAllRentals(req, res) {
 
 export async function deleteRental(req, res) {
 
+    const { id } = res.locals
 
+    try {
+
+        await connection.query(`DELETE FROM rentals WHERE id=$1`, [id])
+
+        res.sendStatus(200)
+
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
 
 }

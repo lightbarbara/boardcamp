@@ -43,17 +43,46 @@ export async function rentalValidation(req, res, next) {
             returnDate: null,
             delayFee: null
         }
-    
+
         const validation = rentalSchema.validate(rental, { abortEarly: false })
-    
+
         if (validation.error) {
             const errors = validation.error.details.map(detail => detail.message)
-    
+
             res.status(400).send({ message: errors })
             return
         }
 
         res.locals.rental = rental
+
+        next()
+
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+
+}
+
+export async function rentalDeleteValidation(req, res, next) {
+
+    const { id } = req.params
+
+    try {
+
+        const rentalExists = await connection.query(`SELECT * FROM rentals WHERE id=$1`, [id])
+
+        if (rentalExists.rows.length === 0) {
+            res.sendStatus(404)
+            return
+        }
+
+        if (rentalExists.rows[0].returnDate) {
+            res.sendStatus(400)
+            return
+        }
+
+        res.locals.id = id
 
         next()
 
