@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createCustomer, findAllCustomers, findCustomerById, updateCustomer } from "../controllers/customer.controller.js";
-import { customerIdValidation, customerValidation } from "../middlewares/customer.middleware.js";
+import { customerIdValidation, customerUpdateValidation, customerValidation } from "../middlewares/customer.middleware.js";
 
 const router = Router()
 
@@ -10,6 +10,6 @@ router.get('/customers', findAllCustomers)
 
 router.get('/customers/:id', customerIdValidation, findCustomerById)
 
-router.put('/customers/:id', updateCustomer)
+router.put('/customers/:id', customerUpdateValidation, updateCustomer)
 
 export default router

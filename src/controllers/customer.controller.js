@@ -53,6 +53,22 @@ export async function findCustomerById(req, res) {
 
 export async function updateCustomer(req, res) {
 
+    const { id, customer } = res.locals
+
+    try {
+
+        const name = customer.name.split(' ').map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ')
+
+        await connection.query(`UPDATE customers SET name=$1, phone=$2, cpf=$3, birthday=$4 WHERE id=$5;`, [name, customer.phone, customer.cpf, customer.birthday, id])
+    
+        res.sendStatus(200)
+
+    } catch(err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+
+
 
 
 }
