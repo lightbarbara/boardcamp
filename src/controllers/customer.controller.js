@@ -21,7 +21,26 @@ export async function createCustomer(req, res) {
 
 export async function findAllCustomers(req, res) {
 
+    let { cpf } = req.query
 
+    try {
+
+        if (cpf) {
+
+            const customersFiltered = await connection.query(`SELECT * FROM customers WHERE cpf LIKE '${cpf}%'`)
+
+            res.status(200).send(customersFiltered.rows)
+            return
+        }
+
+        const customers = await connection.query(`SELECT name, phone, cpf, birthday::text FROM customers`)
+
+        res.status(200).send(customers.rows)
+
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
 
 }
 
