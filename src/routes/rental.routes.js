@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { deleteRental, findAllRentals, postRental, returnRental } from "../controllers/rental.controller.js";
+import { rentalValidation } from "../middlewares/rental.middleware.js";
 
 const router = Router()
 
-router.post('/rentals', postRental)
+router.post('/rentals', rentalValidation, postRental)
 
 router.post('/rentals/:id/return', returnRental)
 

@@ -16,14 +16,14 @@ export async function gameValidation(req, res, next) {
 
     try {
 
-        const categoryExists = await connection.query(`SELECT * FROM categories WHERE id=$1`, [game.categoryId])
+        const categoryExists = await connection.query(`SELECT * FROM categories WHERE id=$1;`, [game.categoryId])
 
-        if (!categoryExists) {
+        if (categoryExists.rows.length === 0) {
             res.sendStatus(400)
             return
         }
 
-        const nameExists = await connection.query(`SELECT * FROM games WHERE name=$1`, [game.name])
+        const nameExists = await connection.query(`SELECT * FROM games WHERE name=$1;`, [game.name])
 
         if (nameExists.rows.length > 0) {
             res.sendStatus(409)

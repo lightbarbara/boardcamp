@@ -16,7 +16,7 @@ export async function categoryValidation(req, res, next) {
 
     try {
 
-        const nameExists = await connection.query(`SELECT * FROM categories WHERE name=$1`, [name])
+        const nameExists = await connection.query(`SELECT * FROM categories WHERE name=$1;`, [name])
 
         if (nameExists.rows.length > 0) {
             res.sendStatus(409)
