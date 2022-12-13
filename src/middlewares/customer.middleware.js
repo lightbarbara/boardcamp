@@ -81,7 +81,7 @@ export async function customerUpdateValidation(req, res, next) {
 
         const cpfExists = await connection.query(`SELECT * FROM customers WHERE cpf=$1;`, [customer.cpf])
 
-        if (cpfExists.rows.length > 0 && id !== customerOnDatabase.rows[0].id) {
+        if (cpfExists.rows.length > 0 && Number(id) !== Number(cpfExists.customerOnDatabase.rows[0].id)) {
             res.sendStatus(409)
             return
         }
