@@ -3,7 +3,9 @@ import { categorySchema } from "../schemas/category.schema.js"
 
 export async function categoryValidation(req, res, next) {
 
-    const { name } = req.body
+    let { name } = req.body
+
+    name = name.split(' ').map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ')
 
     const validation = categorySchema.validate(req.body, { abortEarly: false })
 
