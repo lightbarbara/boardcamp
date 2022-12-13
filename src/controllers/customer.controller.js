@@ -21,19 +21,37 @@ export async function createCustomer(req, res) {
 
 export async function findAllCustomers(req, res) {
 
-    let { cpf } = req.query
+    let { cpf, offset, limit, order } = req.query
 
+    if (!offset) {
+        offset = 0
+    }
+
+    if (!limit) {
+        limit = null
+    }
+    
+    if (!order) {
+        order = 'id'
+    }
+
+    if (desc) {
+        desc = 'DESC'
+    } else {
+        desc = ''
+    }
+    
     try {
 
         if (cpf) {
 
-            const customersFiltered = await connection.query(`SELECT * FROM customers WHERE cpf LIKE '${cpf}%'`)
+            const customersFiltered = await connection.query(`SELECT * FROM customers WHERE cpf LIKE '$1%' ORDER BY ${order} ${desc} OFFSET $2 LIMIT $3;`, [cpf, offset, limit])
 
             res.status(200).send(customersFiltered.rows)
             return
         }
 
-        const customers = await connection.query(`SELECT id, name, phone, cpf, birthday::text FROM customers`)
+        const customers = await connection.query(`SELECT id, name, phone, cpf, birthday::text FROM customers ORDER BY ${order} ${desc} OFFSET $1 LIMIT $2;`, [offset, limit])
 
         res.status(200).send(customers.rows)
 

@@ -49,7 +49,25 @@ export async function returnRental(req, res) {
 
 export async function findAllRentals(req, res) {
 
-    const { customerId, gameId } = req.query
+    let { customerId, gameId, offset, limit, order } = req.query
+
+    if (!offset) {
+        offset = 0
+    }
+
+    if (!limit) {
+        limit = null
+    }
+
+    if (!order) {
+        order = 'id'
+    }
+
+    if (desc) {
+        desc = 'DESC'
+    } else {
+        desc = ''
+    }
 
     let where
 
@@ -83,7 +101,14 @@ export async function findAllRentals(req, res) {
         ON
             games."categoryId" = categories.id
         ${where}
-        `)
+        ORDER BY
+            ${order}
+        ${desc}
+        OFFSET
+            $1
+        LIMIT
+            $2
+        `, [offset, limit])
 
         res.status(200).send(rentals.rows)
 

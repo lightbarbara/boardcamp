@@ -20,8 +20,27 @@ export async function getAllCategories(req, res) {
 
     try {
 
-        const categories = await connection.query(`SELECT * FROM categories`)
+        let { offset, limit, order, desc } = req.query
 
+        if (!offset) {
+            offset = 0
+        }
+
+        if (!limit) {
+            limit = null
+        }
+
+        if (!order) {
+            order = 'id'
+        }
+
+        if (desc) {
+            desc = 'DESC'
+        } else {
+            desc = ''
+        }
+
+        const categories = await connection.query(`SELECT * FROM categories ORDER BY ${order} ${desc} OFFSET $1 LIMIT $2`, [offset, limit])
         res.status(200).send(categories.rows)
 
     } catch (err) {
