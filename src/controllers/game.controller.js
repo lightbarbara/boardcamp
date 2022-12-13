@@ -32,17 +32,22 @@ export async function getAllGames(req, res) {
             const gamesFiltered = await connection.query(`
             SELECT
                 games.*,
+                categories.name AS "categoryName",
                 COALESCE(COUNT(rentals."gameId"), 0) AS "rentalsCount"
             FROM
                 games
+            JOIN
+                categories
+            ON
+                games."categoryId" = categories.id
             LEFT JOIN
                 rentals
             ON
                 games.id = rentals."gameId"
             WHERE
-                name LIKE $1
+                games.name LIKE $1
             GROUP BY
-                games.id
+                games.id, categories.name
             ORDER BY
                 "${order}" ${desc}
             OFFSET
@@ -58,15 +63,20 @@ export async function getAllGames(req, res) {
         const games = await connection.query(`
         SELECT
             games.*,
+            categories.name AS "categoryName",
             COALESCE(COUNT(rentals."gameId"), 0) AS "rentalsCount"
         FROM
             games
+        JOIN
+            categories
+        ON
+            games."categoryId" = categories.id
         LEFT JOIN
             rentals
         ON
             games.id = rentals."gameId"
         GROUP BY
-            games.id
+            games.id, categories.name
         ORDER BY
             "${order}" ${desc}
         OFFSET
