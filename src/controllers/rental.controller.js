@@ -49,7 +49,7 @@ export async function returnRental(req, res) {
 
 export async function findAllRentals(req, res) {
 
-    let { customerId, gameId, offset, limit, order } = req.query
+    let { customerId, gameId, offset, limit, order, desc, status, startDate } = req.query
 
     if (!offset) {
         offset = 0
@@ -81,6 +81,22 @@ export async function findAllRentals(req, res) {
         where = ''
     }
 
+    if (status === 'open' && !(customerId || gameId)) {
+        where = `WHERE rentals."returnDate" IS NULL`
+    } else if (status === 'closed' && !(customerId || gameId)) {
+        where = `WHERE rentals."returnDate" IS NOT NULL`
+    } else if (status === 'open') {
+        where += ` AND rentals."returnDate" IS NULL`
+    } else if (status === 'closed') {
+        where += ` AND rentals."returnDate" IS NOT NULL`
+    }
+
+    if (startDate && !(customerId || gameId || status)) {
+        where = `WHERE rentals."rentDate" >= DATE '${startDate}'`
+    } else if (startDate) {
+        where += ` AND rentals."rentDate" >= DATE '${startDate}'`
+    }
+
     try {
 
         const rentals = await connection.query(`
@@ -102,7 +118,7 @@ export async function findAllRentals(req, res) {
             games."categoryId" = categories.id
         ${where}
         ORDER BY
-            ${order}
+            "${order}"
         ${desc}
         OFFSET
             $1
@@ -128,6 +144,43 @@ export async function deleteRental(req, res) {
         await connection.query(`DELETE FROM rentals WHERE id=$1`, [id])
 
         res.sendStatus(200)
+
+    } catch (err) {
+        console.log(err)
+        res.sendStatus(500)
+    }
+
+}
+
+export async function getMetrics(req, res) {
+
+    const { startDate, endDate } = req.query
+
+    let where
+
+    if (startDate && endDate) {
+        where = `WHERE "rentDate" BETWEEN DATE '${startDate}' AND DATE '${endDate}'`
+    } else if (startDate) {
+        where = `WHERE "rentDate" >= DATE '${startDate}'`
+    } else if (endDate) {
+        where = `WHERE "rentDate" <= DATE '${endDate}'`
+    }
+
+    try {
+
+        const details = await connection.query(`SELECT SUM("originalPrice" + COALESCE("delayFee", 0)), COUNT(id) FROM rentals ${where}`)
+
+        let {sum: revenue, count: rentals} = details.rows[0]
+
+        const average = revenue/rentals
+
+        const result = {
+            revenue: Number(revenue),
+            rentals: Number(rentals),
+            average
+        }
+
+        res.send(result)
 
     } catch (err) {
         console.log(err)

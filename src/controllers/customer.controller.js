@@ -21,7 +21,7 @@ export async function createCustomer(req, res) {
 
 export async function findAllCustomers(req, res) {
 
-    let { cpf, offset, limit, order } = req.query
+    let { cpf, offset, limit, order, desc } = req.query
 
     if (!offset) {
         offset = 0
@@ -45,13 +45,59 @@ export async function findAllCustomers(req, res) {
 
         if (cpf) {
 
-            const customersFiltered = await connection.query(`SELECT * FROM customers WHERE cpf LIKE '$1%' ORDER BY ${order} ${desc} OFFSET $2 LIMIT $3;`, [cpf, offset, limit])
+            const customersFiltered = await connection.query(`
+            SELECT
+                customers.id,
+                customers.name,
+                customers.phone,
+                customers.cpf,
+                customers.birthday::text,
+                COALESCE(COUNT(rentals."customerId"), 0) AS "rentalsCount"
+            FROM
+                customers
+            LEFT JOIN
+                rentals
+            ON
+                customers.id = rentals."customerId"
+            WHERE
+                cpf LIKE $1
+            GROUP BY
+                customers.id
+            ORDER BY
+                ${order} ${desc}
+            OFFSET
+                $2
+            LIMIT
+                $3;`,
+            [`${cpf}%`, offset, limit])
 
             res.status(200).send(customersFiltered.rows)
             return
         }
 
-        const customers = await connection.query(`SELECT id, name, phone, cpf, birthday::text FROM customers ORDER BY ${order} ${desc} OFFSET $1 LIMIT $2;`, [offset, limit])
+        const customers = await connection.query(`
+        SELECT
+            customers.id,
+            customers.name,
+            customers.phone,
+            customers.cpf,
+            customers.birthday::text,
+            COALESCE(COUNT(rentals."customerId"), 0) AS "rentalsCount"
+        FROM
+            customers
+        LEFT JOIN
+            rentals
+        ON
+            customers.id = rentals."customerId"
+        GROUP BY
+            customers.id
+        ORDER BY
+            ${order} ${desc}
+        OFFSET
+            $1
+        LIMIT
+            $2;`,
+        [offset, limit])
 
         res.status(200).send(customers.rows)
 

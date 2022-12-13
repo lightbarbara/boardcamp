@@ -2,7 +2,7 @@ import connection from '../database/database.js'
 
 export async function getAllGames(req, res) {
 
-    let { name, offset, limit, order } = req.query
+    let { name, offset, limit, order, desc } = req.query
 
     if (!offset) {
         offset = 0
@@ -27,13 +27,53 @@ export async function getAllGames(req, res) {
         if (name) {
             name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
 
-            const gamesFiltered = await connection.query(`SELECT * FROM games WHERE name LIKE '$1%' OFFSET $2 LIMIT $3 ORDER BY $4;`, [name, offset, limit, order])
+            console.log(name)
+
+            const gamesFiltered = await connection.query(`
+            SELECT
+                games.*,
+                COALESCE(COUNT(rentals."gameId"), 0) AS "rentalsCount"
+            FROM
+                games
+            LEFT JOIN
+                rentals
+            ON
+                games.id = rentals."gameId"
+            WHERE
+                name LIKE $1
+            GROUP BY
+                games.id
+            ORDER BY
+                "${order}" ${desc}
+            OFFSET
+                $2
+            LIMIT
+                $3;`,
+            [`${name}%`, offset, limit])
 
             res.status(200).send(gamesFiltered.rows)
             return
         }
 
-        const games = await connection.query(`SELECT * FROM games ORDER BY ${order} ${desc} OFFSET $1 LIMIT $2;`, [offset, limit])
+        const games = await connection.query(`
+        SELECT
+            games.*,
+            COALESCE(COUNT(rentals."gameId"), 0) AS "rentalsCount"
+        FROM
+            games
+        LEFT JOIN
+            rentals
+        ON
+            games.id = rentals."gameId"
+        GROUP BY
+            games.id
+        ORDER BY
+            "${order}" ${desc}
+        OFFSET
+            $1
+        LIMIT
+            $2;`,
+        [offset, limit])
 
         res.status(200).send(games.rows)
 
