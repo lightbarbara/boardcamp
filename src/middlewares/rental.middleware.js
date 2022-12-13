@@ -106,7 +106,7 @@ export async function rentalDeleteValidation(req, res, next) {
             return
         }
 
-        if (rentalExists.rows[0].returnDate) {
+        if (!rentalExists.rows[0].returnDate) {
             res.sendStatus(400)
             return
         }
