@@ -98,7 +98,11 @@ export async function addGame(req, res) {
 
     let { name, image, stockTotal, categoryId, pricePerDay } = req.body
 
-    name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+    name = name.split(' ')
+
+    name = name.map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())
+
+    name = name.join(' ')
 
     try {
 
