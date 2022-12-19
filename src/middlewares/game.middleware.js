@@ -5,6 +5,12 @@ export async function gameValidation(req, res, next) {
 
     const game = req.body
 
+    game.name = game.name.split(' ')
+
+    game.name = game.name.map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())
+
+    game.name = game.name.join(' ')
+
     const validation = gameSchema.validate(game, { abortEarly: false })
 
     if (validation.error) {

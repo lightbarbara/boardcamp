@@ -98,12 +98,6 @@ export async function addGame(req, res) {
 
     let { name, image, stockTotal, categoryId, pricePerDay } = req.body
 
-    name = name.split(' ')
-
-    name = name.map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())
-
-    name = name.join(' ')
-
     try {
 
         await connection.query(`INSERT INTO games (name, image, "stockTotal", "categoryId", "pricePerDay") VALUES ($1, $2, $3, $4, $5);`, [name, image, stockTotal, categoryId, pricePerDay])
